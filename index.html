@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本語単語マスター</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+            background: #f5f4f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+            color: #1a1a1a;
+        }
+        
+        .container {
+            background: #ffffff;
+            border-radius: 4px;
+            max-width: 680px;
+            width: 100%;
+            padding: 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            border: 1px solid #e8e6e1;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #e8e6e1;
+        }
+        
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1a1a1a;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            font-size: 13px;
+            color: #8a8a8a;
+        }
+        
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background: #e8e6e1;
+            border: 1px solid #e8e6e1;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+        
+        .stat-box {
+            background: #ffffff;
+            padding: 18px 12px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1a1a1a;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #8a8a8a;
+            margin-top: 4px;
+            letter-spacing: 0.04em;
+        }
+        
+        /* Card Area */
+        .card-area {
+            min-height: 280px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 24px 0;
+        }
+        
+        .word-card {
+            width: 100%;
+            max-width: 480px;
+            padding: 48px 40px;
+            background: #fafaf8;
+            border: 1px solid #e8e6e1;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            position: relative;
+        }
+        
+        .word-card:hover {
+            border-color: #c8c6c1;
+        }
+        
+        .japanese-word {
+            font-size: 44px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            letter-spacing: 0.06em;
+        }
+        
+        .reading {
+            font-size: 18px;
+            color: #8a8a8a;
+            margin-bottom: 8px;
+        }
+        
+        .pos-tag {
+            display: inline-block;
+            font-size: 12px;
+            color: #6b6b6b;
+            background: #ecebe8;
+            padding: 2px 10px;
+            border-radius: 2px;
+            margin-bottom: 16px;
+        }
+        
+        .chinese-meaning {
+            font-size: 24px;
+            font-weight: 500;
+            color: #3a3a3a;
+            margin-top: 20px;
+            display: none;
+            line-height: 1.6;
+        }
+        
+        .chinese-meaning.show {
+            display: block;
+            animation: fadeIn 0.25s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .hint {
+            font-size: 12px;
+            color: #b0aea8;
+            margin-top: 24px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #8a8a8a;
+        }
+        
+        .empty-state h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #5a5a5a;
+        }
+        
+        .empty-state p {
+            font-size: 13px;
+            color: #8a8a8a;
+        }
+        
+        /* Buttons */
+        .controls {
+            display: grid;
+            gap: 1px;
+            margin-top: 24px;
+            background: #e8e6e1;
+            border: 1px solid #e8e6e1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .controls-2 { grid-template-columns: repeat(2, 1fr); }
+        .controls-3 { grid-template-columns: repeat(3, 1fr); }
+        .controls-4 { grid-template-columns: repeat(4, 1fr); }
+        
+        .btn {
+            padding: 13px 16px;
+            border: none;
+            border-radius: 2px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+            letter-spacing: 0.03em;
+            background: transparent;
+            color: #5a5a5a;
+        }
+        
+        .btn:hover:not(:disabled) {
+            background: #f0efe9;
+        }
+        
+        .btn:active:not(:disabled) {
+            background: #e8e6e1;
+        }
+        
+        .btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #333333;
+        }
+        
+        .btn-success {
+            background: #2d6a4f;
+            color: #ffffff;
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            background: #3a8965;
+        }
+        
+        .btn-danger {
+            background: #c1121f;
+            color: #ffffff;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: #e53834;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: #5a5a5a;
+            border: 1px solid #d0cec8;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #f5f4f0;
+            border-color: #b0aea8;
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            height: 3px;
+            background: #e8e6e1;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 28px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #1a1a1a;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #8a8a8a;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: #ffffff;
+            padding: 36px;
+            border-radius: 4px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid #e8e6e1;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            font-size: 18px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #8a8a8a;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 2px;
+            transition: background 0.15s;
+        }
+        
+        .close-btn:hover {
+            background: #f0efe9;
+        }
+        
+        .modal-content h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            letter-spacing: 0.04em;
+        }
+        
+        .modal-content h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #3a3a3a;
+            margin: 20px 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e8e6e1;
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 3px;
+            font-size: 13px;
+            transform: translateX(300px);
+            transition: transform 0.25s ease;
+            z-index: 3000;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        /* Confirm Dialog */
+        .confirm-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .confirm-overlay.show {
+            display: flex;
+        }
+        
+        .confirm-dialog {
+            background: #ffffff;
+            padding: 32px;
+            border-radius: 4px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #e8e6e1;
+        }
+        
+        .confirm-dialog p {
+            font-size: 14px;
+            color: #3a3a3a;
+            margin-bottom: 24px;
+            line-height: 1.7;
+        }
+        
+        .confirm-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .confirm-buttons .btn {
+            min-width: 100px;
+        }
+        
+        /* Unmastered Words */
+        .unmastered-word-item {
+            background: #fafaf8;
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            border-radius: 3px;
+            border-left: 2px solid #c1121f;
+        }
+        
+        .unmastered-word-jp {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+        
+        .unmastered-word-reading {
+            font-size: 14px;
+            color: #8a8a8a;
+            margin-bottom: 4px;
+        }
+        
+        .unmastered-word-chinese {
+            font-size: 15px;
+            color: #3a3a3a;
+        }
+        
+        .unmastered-count-badge {
+            display: inline-block;
+            background: #c1121f;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 2px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        
+        /* Copy Textarea */
+        .copy-textarea {
+            width: 100%;
+            min-height: 180px;
+            padding: 12px;
+            border: 1px solid #d0cec8;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 13px;
+            resize: vertical;
+            margin-top: 8px;
+            background: #fafaf8;
+            color: #1a1a1a;
+        }
+        
+        .copy-textarea:focus {
+            outline: none;
+            border-color: #8a8a8a;
+        }
+        
+        /* Label */
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #3a3a3a;
+        }
+        
+        /* AI Answer Styles */
+        .ai-answer-title {
+            color: #1a1a1a;
+            font-size: 22px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+        
+        .ai-answer-section {
+            margin-bottom: 16px;
+        }
+        
+        .ai-answer-subtitle {
+            color: #1a1a1a;
+            font-size: 16px;
+            margin: 16px 0 8px 0;
+            font-weight: 600;
+            border-bottom: 1px solid #e8e6e1;
+            padding-bottom: 6px;
+        }
+        
+        .ai-answer-text {
+            line-height: 1.8;
+            color: #3a3a3a;
+            font-size: 15px;
+        }
+        
+        .ai-phrases-list, .ai-examples-list {
+            padding-left: 20px;
+            line-height: 1.8;
+            margin: 8px 0;
+        }
+        
+        .ai-phrases-list li, .ai-examples-list li {
+            margin-bottom: 6px;
+        }
+        
+        .ai-warning {
+            background: #faf7f0;
+            padding: 14px 18px;
+            border-radius: 3px;
+            margin-top: 16px;
+            border-left: 2px solid #b8860b;
+            line-height: 1.7;
+            font-size: 14px;
+            color: #5a4e30;
+        }
+        
+        /* Loading */
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #d0cec8;
+            border-top: 2px solid #1a1a1a;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Filter Section */
+        .filter-section {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .filter-btn {
+            padding: 7px 14px;
+            border: 1px solid #d0cec8;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            background: #ffffff;
+            color: #5a5a5a;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        
+        .filter-btn:hover {
+            background: #f0efe9;
+        }
+        
+        .filter-btn.active {
+            background: #1a1a1a;
+            color: #ffffff;
+            border-color: #1a1a1a;
+        }
+        
+        /* Table */
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+        
+        .stats-table th, .stats-table td {
+            text-align: left;
+            padding: 10px 14px;
+            border-bottom: 1px solid #e8e6e1;
+            font-size: 13px;
+        }
+        
+        .stats-table th {
+            font-weight: 600;
+            color: #1a1a1a;
+            background: #fafaf8;
+        }
+        
+        .stats-table td {
+            color: #3a3a3a;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 16px 10px; }
+            .container { padding: 24px 20px; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .controls-4 { grid-template-columns: repeat(2, 1fr); }
+            .japanese-word { font-size: 34px; }
+            .modal-content { padding: 24px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>日本語単語マスター</h1>
+            <p>効率的に単語を暗記する</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-value" id="totalCount">0</div>
+                <div class="stat-label">総単語数</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="learnedCount">0</div>
+                <div class="stat-label">学習済み</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="masteredCount">0</div>
+                <div class="stat-label">完璧</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="unmasteredCount">0</div>
+                <div class="stat-label">未習得</div>
+            </div>
+        </div>
+        
+        <div class="card-area" id="cardArea">
+            <div style="text-align: center; color: #8a8a8a;">
+                <h3 style="font-size: 16px; font-weight: 500; margin-bottom: 8px; color: #5a5a5a;">学習を開始しますか</h3>
+                <p style="font-size: 13px; color: #8a8a8a;">「新しい単語を学習」ボタンを押してください</p>
+            </div>
+        </div>
+        
+        <div class="controls controls-2" id="controls" style="opacity: 0.5;">
+            <button class="btn btn-success" id="masteredBtn" disabled>覚えた</button>
+            <button class="btn btn-danger" id="unmasteredBtn" disabled>覚えていない</button>
+        </div>
+        
+        <div class="controls controls-4" id="extraControls" style="margin-top: 15px; opacity: 0.5;">
+            <button class="btn btn-secondary" onclick="askAI(state.currentWord)" id="aiButton" disabled>AI解説</button>
+            <button class="btn btn-secondary" onclick="startLearning()">新しい単語を学習</button>
+            <button class="btn btn-secondary" onclick="startReview()">復習する</button>
+            <button class="btn btn-danger" onclick="confirmResetProgress()">進捗リセット</button>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">学習進度：0%</div>
+        
+        <div class="controls controls-3" id="exportControls" style="margin-top: 15px; opacity: 0.5;">
+            <button class="btn btn-secondary" onclick="showUnmasteredWords()" id="exportBtn">復習リストをエクスポート</button>
+            <button class="btn btn-secondary" onclick="exportFullProgress()" id="backupBtn">進捗バックアップ</button>
+            <button class="btn btn-secondary" onclick="showImportModal()">インポート</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="statsModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('statsModal')">×</button>
+            <h2>学習統計</h2>
+            <div id="statsContent" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+    
+    <div class="modal" id="aiModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('aiModal')">×</button>
+            <div id="aiAnswerContent"></div>
+        </div>
+    </div>
+    
+    <div class="modal" id="unmasteredModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('unmasteredModal')">×</button>
+            <h2>復習が必要な単語</h2>
+            <p style="color: #8a8a8a; margin-top: 10px; font-size: 13px;">まだ習得していない単語です。引き続き復習しましょう。</p>
+            <div id="unmasteredContent" style="margin-top: 20px;"></div>
+            <div style="margin-top: 20px; padding: 15px; background: #fafaf8; border-radius: 3px;">
+                <button class="btn btn-primary" onclick="copyUnmasteredWords()" style="width: 100%; padding: 12px;">クリップボードにコピー</button>
+                <button class="btn btn-secondary" onclick="downloadUnmasteredWords()" style="width: 100%; padding: 12px; margin-top: 10px;">テキストファイルで保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('importModal')">×</button>
+            <h2>進捗データのインポート</h2>
+            <p style="color: #8a8a8a; margin-top: 10px; font-size: 13px;">「進捗バックアップ」で保存した JSON ファイル、またはテキスト形式の復習リストをインポートします</p>
+
+            <div style="margin-top: 20px;">
+                <label>テキストを貼り付け（または JSON ファイルを選択）</label>
+                <textarea id="importText" class="copy-textarea" placeholder="進捗バックアップ JSON を貼り付けるか、テキスト形式の復習リストを貼り付けてください。&#10;&#10;【JSON バックアップ例】&#10;{&quot;version&quot;:&quot;1.0&quot;, &quot;learnedIds&quot;:[...], ...}&#10;&#10;【テキスト形式例】&#10;=== 復習リスト ===&#10;1. 食べる (たべる) [動詞]&#10;   意味：食べる"></textarea>
+
+                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                    <button class="btn btn-primary" onclick="pasteAndImport()" style="flex: 1;">クリップボードから貼り付け</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()" style="flex: 1;">ファイルを選択</button>
+                    <input type="file" id="fileInput" accept=".txt,.json" style="display:none" onchange="handleFileImport(event)">
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-primary" onclick="importFromText()" style="width: 100%; padding: 12px;">インポートする</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Confirm Dialog -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-dialog">
+            <p id="confirmMessage"></p>
+            <div class="confirm-buttons">
+                <button class="btn btn-primary" id="confirmYes">はい</button>
+                <button class="btn btn-secondary" id="confirmNo">キャンセル</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+    
+    <script>
+    // ============================================================
+    // State Management
+    // ============================================================
+    const state = {
+        words: [],
+        currentWord: null,
+        learnedIds: new Set(),
+        masteredIds: new Set(),
+        unmasteredIds: new Set(),
+        reviewQueue: [],
+        currentIndex: 0,
+        stats: {},
+        filterCategory: 'all'
+    };
+
+    // ============================================================
+    // Load Words
+    // ============================================================
+    async function loadWords() {
+        try {
+            const response = await fetch('word_data.json');
+            if (!response.ok) throw new Error('Failed to load words.json');
+            state.words = await response.json();
+            loadProgress();
+            updateStats();
+            showToast('単語を' + state.words.length + '件読み込みました');
+        } catch (error) {
+            console.error('Error loading words:', error);
+            document.getElementById('cardArea').innerHTML = 
+                '<div class="empty-state"><h3>単語データの読み込みに失敗しました</h3><p>words.jsonファイルが存在するか確認してください。</p></div>';
+        }
+    }
+
+    // ============================================================
+    // Progress Management
+    // ============================================================
+    function loadProgress() {
+        try {
+            const saved = localStorage.getItem('japaneseVocabProgress');
+            if (saved) {
+                const data = JSON.parse(saved);
+                state.learnedIds = new Set(data.learnedIds || []);
+                state.masteredIds = new Set(data.masteredIds || []);
+                state.unmasteredIds = new Set(data.unmasteredIds || []);
+            }
+        } catch (e) {
+            console.warn('Failed to load progress:', e);
+        }
+    }
+
+    async function saveProgress() {
+        try {
+            const data = {
+                learnedIds: [...state.learnedIds],
+                masteredIds: [...state.masteredIds],
+                unmasteredIds: [...state.unmasteredIds],
+                lastUpdated: new Date().toISOString()
+            };
+            localStorage.setItem('japaneseVocabProgress', JSON.stringify(data));
+        } catch (e) {
+            console.warn('Failed to save progress:', e);
+        }
+    }
+
+    // ============================================================
+    // Update Stats Display
+    // ============================================================
+    function updateStats() {
+        const total = state.words.length;
+        const learned = state.learnedIds.size;
+        const mastered = state.masteredIds.size;
+        const unmastered = state.unmasteredIds.size;
+        
+        document.getElementById('totalCount').textContent = total;
+        document.getElementById('learnedCount').textContent = learned;
+        document.getElementById('masteredCount').textContent = mastered;
+        document.getElementById('unmasteredCount').textContent = unmastered;
+        
+        const progress = total > 0 ? Math.round((learned / total) * 100) : 0;
+        document.getElementById('progressFill').style.width = progress + '%';
+        document.getElementById('progressText').textContent = '学習進度：' + progress + '%';
+        
+        state.stats = { total, learned, mastered, unmastered, progress };
+    }
+
+    // ============================================================
+    // Learning Flow
+    // ============================================================
+    function startLearning() {
+        const unlearned = state.words.filter(w => !state.learnedIds.has(String(w.id)));
+        if (unlearned.length === 0) {
+            showToast('すべての単語を学習済みです');
+            return;
+        }
+        
+        const shuffled = shuffleArray(unlearned);
+        state.reviewQueue = shuffled;
+        state.currentIndex = 0;
+        enableControls(true);
+        showNextCard();
+    }
+
+    function startReview() {
+        const unmastered = state.words.filter(w => state.learnedIds.has(String(w.id)) && !state.masteredIds.has(String(w.id)));
+        if (unmastered.length === 0) {
+            showToast('復習対象の単語がありません');
+            return;
+        }
+        
+        const masteredRecently = state.words.filter(w => state.masteredIds.has(String(w.id)));
+        const queue = [...unmastered];
+        if (masteredRecently.length > 0) {
+            queue.push(...shuffleArray(masteredRecently).slice(0, Math.ceil(masteredRecently.length * 0.3)));
+        }
+        
+        state.reviewQueue = shuffleArray(queue);
+        state.currentIndex = 0;
+        enableControls(true);
+        showNextCard();
+    }
+
+    function showNextCard() {
+        if (state.currentIndex >= state.reviewQueue.length) {
+            showSessionComplete();
+            return;
+        }
+        
+        state.currentWord = state.reviewQueue[state.currentIndex];
+        renderCard(state.currentWord);
+    }
+
+    function renderCard(word) {
+        const cardArea = document.getElementById('cardArea');
+        cardArea.innerHTML = `
+            <div class="word-card" id="wordCard" onclick="toggleMeaning()">
+                <div class="japanese-word">${escapeHtml(word.japanese)}</div>
+                ${word.reading ? '<div class="reading">' + escapeHtml(word.reading) + '</div>' : ''}
+                ${word.pos ? '<div class="pos-tag">' + escapeHtml(word.pos) + '</div>' : ''}
+                <div class="chinese-meaning" id="meaningDisplay">${escapeHtml(word.chinese)}</div>
+                <div class="hint">意味を表示するにはカードをクリック</div>
+            </div>
+        `;
+        
+        document.getElementById('masteredBtn').disabled = false;
+        document.getElementById('unmasteredBtn').disabled = false;
+        document.getElementById('aiButton').disabled = false;
+    }
+
+    function toggleMeaning() {
+        const meaningEl = document.getElementById('meaningDisplay');
+        if (meaningEl) {
+            meaningEl.classList.toggle('show');
+        }
+    }
+
+    function markAsMastered() {
+        if (!state.currentWord) return;
+        
+        const id = String(state.currentWord.id);
+        state.learnedIds.add(id);
+        state.masteredIds.add(id);
+        state.unmasteredIds.delete(id);
+        
+        state.currentIndex++;
+        saveProgress().then(() => {
+            updateStats();
+            showNextCard();
+        });
+    }
+
+    function markAsUnmastered() {
+        if (!state.currentWord) return;
+        
+        const id = String(state.currentWord.id);
+        state.learnedIds.add(id);
+        state.unmasteredIds.add(id);
+        state.masteredIds.delete(id);
+        
+        state.currentIndex++;
+        saveProgress().then(() => {
+            updateStats();
+            showNextCard();
+        });
+    }
+
+    function showSessionComplete() {
+        enableControls(false);
+        document.getElementById('masteredBtn').disabled = true;
+        document.getElementById('unmasteredBtn').disabled = true;
+        document.getElementById('aiButton').disabled = true;
+        
+        const cardArea = document.getElementById('cardArea');
+        cardArea.innerHTML = `
+            <div class="empty-state">
+                <h3>学習セッション完了</h3>
+                <p>次のセッションを開始しますか？</p>
+            </div>
+        `;
+        state.currentWord = null;
+    }
+
+    // ============================================================
+    // Controls
+    // ============================================================
+    function enableControls(enabled) {
+        const controls = document.getElementById('controls');
+        const extra = document.getElementById('extraControls');
+        const exportCtrl = document.getElementById('exportControls');
+        
+        if (enabled) {
+            controls.style.opacity = '1';
+            extra.style.opacity = '1';
+            exportCtrl.style.opacity = '1';
+        } else {
+            controls.style.opacity = '0.5';
+            extra.style.opacity = '0.5';
+            exportCtrl.style.opacity = '0.5';
+        }
+    }
+
+    // ============================================================
+    // AI Explanation
+    // ============================================================
+    async function askAI(word) {
+        if (!word) return;
+        
+        const aiContent = document.getElementById('aiAnswerContent');
+        aiContent.innerHTML = '<div style="text-align:center;padding:40px;"><span class="loading-spinner"></span><p style="color:#8a8a8a;margin-top:12px;font-size:13px;">AI解説を読み込み中...</p></div>';
+        openModal('aiModal');
+        
+        try {
+            const prompt = buildAIPrompt(word);
+            const answer = await callAI(prompt);
+            aiContent.innerHTML = renderAIAnswer(answer, word);
+        } catch (error) {
+            console.error('AI request failed:', error);
+            aiContent.innerHTML = '<p style="color:#c1121f;text-align:center;padding:40px;">AI解説の取得に失敗しました。後でもう一度お試しください。</p>';
+        }
+    }
+
+    function buildAIPrompt(word) {
+        return `以下の日本語単語について、中国語学習者向けの詳細な解説を提供してください。
+
+単語：${word.japanese}
+読み方：${word.reading || 'なし'}
+品詞：${word.pos || 'なし'}
+意味：${word.chinese}
+
+以下の項目を含めてください：
+1. 発音のポイント（音声的な特徴）
+2. 文法上の用法と活用パターン
+3. よく使われる例文（日本語と中国語訳付き）3つ
+4. 類似の単語や混同しやすい表現との違い
+5. 学習上の注意点とよくある間違い
+
+出力は見出しと箇条書きで構造化してください。`;
+    }
+
+    async function callAI(prompt) {
+        const apiUrl = window.AI_API_URL || '';
+        if (!apiUrl) {
+            throw new Error('AI API URLが設定されていません');
+        }
+        
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.7,
+                max_tokens: 2000
+            })
+        });
+        
+        if (!response.ok) throw new Error('APIエラー: ' + response.status);
+        
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content || '応答が空です';
+    }
+
+    function renderAIAnswer(content, word) {
+        const lines = content.split('\n');
+        let html = `<div class="ai-answer-title">${escapeHtml(word.japanese)} (${escapeHtml(word.reading || '')})</div>`;
+        
+        let inList = false;
+        let listItems = [];
+        
+        for (const line of lines) {
+            const trimmed = line.trim();
+            
+            if (trimmed.startsWith('- ') || trimmed.match(/^\d+\.\s/)) {
+                if (!inList) {
+                    inList = true;
+                    listItems = [];
+                }
+                listItems.push(trimmed.replace(/^[-•]\s*/, '').replace(/^\d+\.\s*/, ''));
+                continue;
+            }
+            
+            if (inList && (trimmed === '' || !trimmed.startsWith('- ') && !trimmed.match(/^\d+\.\s/))) {
+                if (listItems.length > 0) {
+                    html += '<ul class="ai-examples-list">';
+                    listItems.forEach(item => {
+                        html += '<li>' + escapeHtml(item) + '</li>';
+                    });
+                    html += '</ul>';
+                }
+                inList = false;
+                listItems = [];
+            }
+            
+            if (trimmed.startsWith('# ')) {
+                if (inList) { flushList(); inList = false; }
+                html += '<div class="ai-answer-subtitle">' + escapeHtml(trimmed.replace(/^#\s*/, '')) + '</div>';
+            } else if (trimmed.startsWith('## ')) {
+                if (inList) { flushList(); inList = false; }
+                html += '<div class="ai-answer-subtitle">' + escapeHtml(trimmed.replace(/^##\s*/, '')) + '</div>';
+            } else if (trimmed.startsWith('> ')) {
+                html += '<blockquote style="border-left:2px solid #c8c6c1;padding:8px 16px;margin:8px 0;color:#5a5a5a;font-style:italic;">' + escapeHtml(trimmed.replace(/^>\s*/, '')) + '</blockquote>';
+            } else if (trimmed !== '') {
+                if (inList) { flushList(); inList = false; }
+                html += '<div class="ai-answer-text">' + escapeHtml(trimmed) + '</div>';
+            }
+        }
+        
+        if (inList && listItems.length > 0) {
+            html += '<ul class="ai-examples-list">';
+            listItems.forEach(item => {
+                html += '<li>' + escapeHtml(item) + '</li>';
+            });
+            html += '</ul>';
+        }
+        
+        return html;
+    }
+
+    function flushList() {
+        // placeholder for consistency
+    }
+
+    // ============================================================
+    // Unmastered Words Export
+    // ============================================================
+    function showUnmasteredWords() {
+        const unmastered = state.words.filter(w => state.unmasteredIds.has(String(w.id)));
+        const container = document.getElementById('unmasteredContent');
+        
+        if (unmastered.length === 0) {
+            container.innerHTML = '<p style="color:#8a8a8a;text-align:center;padding:20px;">復習すべき単語はありません</p>';
+        } else {
+            let html = '<p style="color:#8a8a8a;margin-bottom:12px;font-size:13px;">合計 <strong style="color:#c1121f;">' + unmastered.length + '</strong> 単語</p>';
+            unmastered.forEach((w, i) => {
+                html += '<div class="unmastered-word-item">';
+                html += '<div class="unmastered-word-jp">' + escapeHtml(w.japanese) + '</div>';
+                if (w.reading) html += '<div class="unmastered-word-reading">' + escapeHtml(w.reading) + '</div>';
+                html += '<div class="unmastered-word-chinese">' + escapeHtml(w.chinese) + '</div>';
+                html += '</div>';
+            });
+            container.innerHTML = html;
+        }
+        
+        openModal('unmasteredModal');
+    }
+
+    function copyUnmasteredWords() {
+        const unmastered = state.words.filter(w => state.unmasteredIds.has(String(w.id)));
+        if (unmastered.length === 0) {
+            showToast('コピーする単語がありません');
+            return;
+        }
+        
+        let text = '=== 復習リスト ===\n\n';
+        unmastered.forEach((w, i) => {
+            text += (i + 1) + '. ' + w.japanese;
+            if (w.reading) text += ' (' + w.reading + ')';
+            if (w.pos) text += ' [' + w.pos + ']';
+            text += '\n   意味：' + w.chinese + '\n';
+        });
+        text += '\n=== 合計 ' + unmastered.length + ' 単語 ===';
+        
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('クリップボードにコピーしました');
+        }).catch(() => {
+            showToast('コピーに失敗しました');
+        });
+    }
+
+    function downloadUnmasteredWords() {
+        const unmastered = state.words.filter(w => state.unmasteredIds.has(String(w.id)));
+        if (unmastered.length === 0) {
+            showToast('ダウンロードする単語がありません');
+            return;
+        }
+        
+        let text = '=== 復習リスト ===\n\n';
+        unmastered.forEach((w, i) => {
+            text += (i + 1) + '. ' + w.japanese;
+            if (w.reading) text += ' (' + w.reading + ')';
+            if (w.pos) text += ' [' + w.pos + ']';
+            text += '\n   意味：' + w.chinese + '\n';
+        });
+        text += '\n=== 合計 ' + unmastered.length + ' 単語 ===\n';
+        text += '\n生成日時：' + new Date().toLocaleString('ja-JP') + '\n';
+        
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '復習リスト_' + new Date().toISOString().slice(0, 10) + '.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showToast('ファイルをダウンロードしました');
+    }
+
+    function exportFullProgress() {
+        if (state.learnedIds.size === 0) {
+            showToast('エクスポートするデータがありません');
+            return;
+        }
+
+        const data = {
+            version: '1.0',
+            exportedAt: new Date().toISOString(),
+            totalWords: state.words.length,
+            learnedIds: [...state.learnedIds],
+            masteredIds: [...state.masteredIds],
+            unmasteredIds: [...state.unmasteredIds]
+        };
+
+        const json = JSON.stringify(data, null, 2);
+        const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '日本語学習進捗_' + new Date().toISOString().slice(0, 10) + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showToast('進捗バックアップをダウンロードしました（既習 ' + state.learnedIds.size + '語）');
+    }
+
+    // ============================================================
+    // Import Functions
+    // ============================================================
+    function showImportModal() {
+        document.getElementById('importText').value = '';
+        openModal('importModal');
+    }
+
+    async function pasteAndImport() {
+        try {
+            const text = await navigator.clipboard.readText();
+            document.getElementById('importText').value = text;
+            showToast('クリップボードから貼り付けました');
+        } catch (err) {
+            showToast('クリップボードへのアクセスが拒否されました');
+        }
+    }
+
+    function handleFileImport(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const content = e.target.result;
+            // JSON progress backup: detect by extension or leading '{'
+            if (file.name.toLowerCase().endsWith('.json') || content.trimStart().startsWith('{')) {
+                try {
+                    const data = JSON.parse(content);
+                    importFullProgress(data);
+                    closeModal('importModal');
+                } catch (err) {
+                    showToast('JSONファイルの解析に失敗しました');
+                }
+            } else {
+                document.getElementById('importText').value = content;
+                showToast('ファイルを読み込みました');
+            }
+        };
+        reader.readAsText(file, 'utf-8');
+        event.target.value = '';
+    }
+
+    function importFullProgress(data) {
+        if (!data || !Array.isArray(data.learnedIds)) {
+            showToast('無効なバックアップファイルです（learnedIds が見つかりません）');
+            return;
+        }
+
+        // Restore all three progress sets from the backup
+        state.learnedIds   = new Set(data.learnedIds.map(String));
+        state.masteredIds  = new Set((data.masteredIds  || []).map(String));
+        state.unmasteredIds = new Set((data.unmasteredIds || []).map(String));
+
+        saveProgress().then(() => {
+            updateStats();
+            if (state.learnedIds.size > 0) {
+                enableControls(true);
+            }
+            const learned    = state.learnedIds.size;
+            const mastered   = state.masteredIds.size;
+            const unmastered = state.unmasteredIds.size;
+            showToast('進捗を復元しました：既習 ' + learned + '語（習得済 ' + mastered + '語 / 未習得 ' + unmastered + '語）');
+        });
+    }
+
+    function importFromText() {
+        const text = document.getElementById('importText').value.trim();
+        if (!text) {
+            showToast('インポートするテキストを入力してください');
+            return;
+        }
+
+        // Detect pasted JSON progress backup
+        if (text.startsWith('{')) {
+            try {
+                const data = JSON.parse(text);
+                importFullProgress(data);
+                closeModal('importModal');
+                return;
+            } catch (err) {
+                showToast('JSON の解析に失敗しました。テキスト形式として処理します');
+            }
+        }
+
+        // Existing numbered-list text format handling
+        const imported = parseImportText(text);
+        let addedCount = 0;
+        let notFoundCount = 0;
+
+        imported.forEach(importId => {
+            const word = state.words.find(w => String(w.id) === String(importId));
+            if (word) {
+                const id = String(word.id);
+                state.learnedIds.add(id);
+                state.unmasteredIds.add(id);
+                state.masteredIds.delete(id);
+                addedCount++;
+            } else {
+                notFoundCount++;
+            }
+        });
+
+        saveProgress().then(() => {
+            updateStats();
+            closeModal('importModal');
+
+            let message = 'インポート完了：' + addedCount + '単語を追加';
+            if (notFoundCount > 0) {
+                message += '（' + notFoundCount + '単語が見つかりませんでした）';
+            }
+            showToast(message);
+        });
+    }
+
+    function parseImportText(text) {
+        const ids = [];
+        const lines = text.split('\n');
+        
+        for (const line of lines) {
+            const match = line.match(/^\d+\.\s+(.+?)(?:\s*\([^)]*\))?/);
+            if (match) {
+                const wordStr = match[1].trim();
+                const found = state.words.find(w => 
+                    w.japanese === wordStr || 
+                    (w.reading && w.japanese === wordStr)
+                );
+                if (found) ids.push(found.id);
+            }
+        }
+        
+        return ids;
+    }
+
+    // ============================================================
+    // Reset Progress
+    // ============================================================
+    function confirmResetProgress() {
+        document.getElementById('confirmMessage').textContent = 
+            '進捗データをすべてリセットしてもよろしいですか？この操作は取り消せません。';
+        
+        document.getElementById('confirmYes').onclick = function() {
+            resetProgress();
+            closeModal('confirmOverlay');
+        };
+        
+        document.getElementById('confirmNo').onclick = function() {
+            closeModal('confirmOverlay');
+        };
+        
+        openModal('confirmOverlay');
+    }
+
+    function resetProgress() {
+        state.learnedIds.clear();
+        state.masteredIds.clear();
+        state.unmasteredIds.clear();
+        state.reviewQueue = [];
+        state.currentWord = null;
+        
+        localStorage.removeItem('japaneseVocabProgress');
+        updateStats();
+        enableControls(false);
+        
+        const cardArea = document.getElementById('cardArea');
+        cardArea.innerHTML = `
+            <div class="empty-state">
+                <h3>学習を開始しますか</h3>
+                <p>「新しい単語を学習」ボタンを押してください</p>
+            </div>
+        `;
+        
+        showToast('進捗データをリセットしました');
+    }
+
+    // ============================================================
+    // Modal Utilities
+    // ============================================================
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    // Close modals on overlay click
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal')) {
+            e.target.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal.show').forEach(m => {
+                m.classList.remove('show');
+            });
+            document.getElementById('confirmOverlay').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+    });
+
+    // ============================================================
+    // Toast Notification
+    // ============================================================
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    // ============================================================
+    // Keyboard Shortcuts
+    // ============================================================
+    document.addEventListener('keydown', function(e) {
+        if (!state.currentWord) return;
+        
+        // Don't trigger shortcuts when typing in inputs
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        switch(e.key) {
+            case ' ':
+                e.preventDefault();
+                toggleMeaning();
+                break;
+            case '1':
+            case 'ArrowLeft':
+                markAsUnmastered();
+                break;
+            case '2':
+            case 'ArrowRight':
+                markAsMastered();
+                break;
+        }
+    });
+
+    // ============================================================
+    // Button Event Listeners
+    // ============================================================
+    document.getElementById('masteredBtn').addEventListener('click', markAsMastered);
+    document.getElementById('unmasteredBtn').addEventListener('click', markAsUnmastered);
+
+    // ============================================================
+    // Utility Functions
+    // ============================================================
+    function shuffleArray(array) {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    // ============================================================
+    // Initialize
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        loadWords();
+    });
+    </script>
+</body>
+</html>
